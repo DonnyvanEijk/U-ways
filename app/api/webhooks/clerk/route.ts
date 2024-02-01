@@ -1,14 +1,15 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
-import { db } from "@/lib/db"
+
+import { db } from '@/lib/db'
+
 
 export async function POST(req: Request) {
-
     // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
-    const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+    const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
 
-    if (!CLERK_WEBHOOK_SECRET) {
+    if (!WEBHOOK_SECRET) {
         throw new Error('Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local')
     }
 
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     const body = JSON.stringify(payload);
 
     // Create a new Svix instance with your secret.
-    const wh = new Webhook(CLERK_WEBHOOK_SECRET);
+    const wh = new Webhook(WEBHOOK_SECRET);
 
     let evt: WebhookEvent
 
@@ -48,30 +49,19 @@ export async function POST(req: Request) {
         })
     }
 
-    // Get the ID and type
-
     const eventType = evt.type;
 
-    if(eventType === "user.created") {
-    await db.user.create({
-        data: {
-            externalUserId: payload.data.id,
-            username: payload.data.username,
-            imageUrl: payload.data.image_url
-        }
-    });
+    if (eventType === "user.created") {
+        await db.user.create({
+            data: {
+                externalUserId: payload.data.id,
+                username: payload.data.username,
+                imageUrl: payload.data.image_url,
+            },
+        });
     }
 
-    if(eventType === "user.updated") {
-        const currentUser = await db.user.findUnique({
-            where: {
-                externalUserId: payload.data.id
-            }
-        });
-
-        if (!currentUser) {
-            return new Response("User not found", {status: 404})
-        }
+    if (eventType === "user.updated") {
         await db.user.update({
             where: {
                 externalUserId: payload.data.id,
@@ -79,21 +69,18 @@ export async function POST(req: Request) {
             data: {
                 username: payload.data.username,
                 imageUrl: payload.data.image_url,
-            }
-        })
-
+            },
+        });
     }
 
-    if(eventType === "user.deleted"){
-      await db.user.delete({
-          where: {
-              externalUserId: payload.data.id,
-          }
-      })
+    if (eventType === "user.deleted") {
+        await db.user.delete({
+            where: {
+                externalUserId: payload.data.id,
+            },
+        });
     }
-
-
+    console.log("Did action: " + eventType)
 
     return new Response('', { status: 200 })
-}
- 
+};

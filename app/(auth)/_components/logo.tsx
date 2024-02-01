@@ -1,3 +1,4 @@
+import Link from "next/link"
 import Image from "next/image";
 import { Poppins } from "next/font/google";
 
@@ -10,26 +11,29 @@ const font = Poppins({
 
 export const Logo = () => {
     return (
-        <div className="flex flex-col items-center gap-y-4">
+
+    <Link href='/'>
+        <div className="hidden lg:flex items-center gap-x-4 hover:opacity-75 transition">
             <div className="bg-white rounded-full p-1">
                 <Image
                     src="/spooky.svg"
-                    alt="Gamehub"
-                    height="80"
-                    width="80"
+                    alt="logo"
+                    height="32"
+                    width="32"
+
                 />
+
             </div>
-            <div className={cn(
-                "flex flex-col items-center",
-                font.className,
-            )}>
-                <p className="text-xl font-semibold">
-                    D-ways
+            <div className={cn(font.className)}>
+                <p className="text-lg font-semibold">
+                  U-ways
                 </p>
-                <p className="text-sm text-muted-foreground">
-                    The D way to play
+                <p className="text-xs text-muted-foreground">
+                    The U way to play
                 </p>
             </div>
         </div>
+    </Link>
+
     );
 };
