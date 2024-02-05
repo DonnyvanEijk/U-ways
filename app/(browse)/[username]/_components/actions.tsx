@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 interface ActionsProps {
     isFollowing: boolean;
     userId: string;
-};
+}
 
 export const Actions = ({
                             isFollowing,
