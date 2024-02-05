@@ -1,38 +1,44 @@
-import { db } from "@/lib/db"
-import {getSelf} from "@/lib/auth-service";
+import { db } from "@/lib/db";
+import { getSelf } from "@/lib/auth-service";
 
 export const getRecommended = async () => {
-
     let userId;
 
     try {
-        const self = await getSelf()
-        userId = self.id
-    }
-    catch{
-        userId = null
+        const self = await getSelf();
+        userId = self.id;
+    } catch {
+        userId = null;
     }
 
-    let users = []
+    let users = [];
 
-    if(userId) {
+    if (userId) {
         users = await db.user.findMany({
             where: {
                 AND: [
                     {
-                    NOT: {
-                        id: userId
-                    }
-                },
+                        NOT: {
+                            id: userId,
+                        },
+                    },
                     {
-                       NOT: {
-                           followedBy: {
-                               some: {
-                                   followerId: userId,
-                               },
-                           },
-                       },
-
+                        NOT: {
+                            followedBy: {
+                                some: {
+                                    followerId: userId,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        NOT: {
+                            blocking: {
+                                some: {
+                                    blockedId: userId,
+                                },
+                            },
+                        },
                     },
                 ],
             },
@@ -44,11 +50,9 @@ export const getRecommended = async () => {
         users = await db.user.findMany({
             orderBy: {
                 createdAt: "desc"
-            }
-
-        })
+            },
+        });
     }
 
-
     return users;
-}
+};
